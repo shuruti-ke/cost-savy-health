@@ -24,6 +24,8 @@ interface Facility {
   longitude: number | null;
   facility_key: string;
   website_url: string | null;
+  payer_name: string | null;
+  payer_differs: boolean;
 }
 
 interface MapData {
@@ -320,7 +322,12 @@ export default function PriceSearch() {
                   const isLow = f.price && f.price <= minPrice * 1.2;
                   const isEst = !f.price;
                   const showWeb = f.web_price != null && Number(f.web_price) > 0;
-                  const note = f.price ? (f.price_source === "web_search" ? "Web search" : f.price_source === "db" ? "Verified" : "Verified") : "Estimate";
+                  const note = f.price
+                    ? (f.price_source === "web_search" ? "Web search" : "Verified")
+                    : "Estimate";
+                  const payerLabel = f.payer_differs && f.payer_name
+                    ? `Insurance covered by ${f.payer_name}`
+                    : "Healthcare Facility";
                   let siteHtml: React.ReactNode = null;
                   try {
                     if (f.website_url) {
@@ -342,7 +349,7 @@ export default function PriceSearch() {
                         <div className="w-6 h-6 rounded-full bg-[#6b2458] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</div>
                         <div className="min-w-0">
                           <p className="font-semibold text-[#6b2458] text-sm truncate">{f.hospital_name || "Healthcare Facility"}</p>
-                          <p className="text-xs text-gray-400 mb-1">Healthcare Facility</p>
+                          <p className={`text-xs mb-1 ${f.payer_differs ? "text-amber-600 font-medium" : "text-gray-400"}`}>{payerLabel}</p>
                           <p className="text-xs text-gray-500">
                             {f.distance_miles != null && <span>📍 {f.distance_miles.toFixed(1)} mi · </span>}
                             {normalizeAddress(f.address || "")}
